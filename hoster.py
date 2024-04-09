@@ -133,7 +133,7 @@ def update_hosts_file():
         aux_hosts.writelines(lines)
 
     #replace etc/hosts with aux file, making it atomic
-    shutil.move(aux_file_path, hosts_path)
+    shutil.copyfile(aux_file_path, hosts_path)
 
 
 def parse_args():
