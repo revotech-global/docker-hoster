@@ -61,6 +61,7 @@ def get_container_data(dockerClient, container_id):
     info = dockerClient.inspect_container(container_id)
     container_hostname = info["Config"]["Hostname"]
     container_name = info["Name"].strip("/")
+    service_name = info["Config"]["Labels"]["com.docker.compose.service"]
     container_ip = info["NetworkSettings"]["IPAddress"]
     if not container_ip:
         if info["HostConfig"] and info["HostConfig"]["NetworkMode"] and info["HostConfig"]["NetworkMode"].startswith("container:"):
@@ -82,12 +83,12 @@ def get_container_data(dockerClient, container_id):
 
         result.append({
                 "ip": values["IPAddress"] , 
-                "name": container_name,
+                "name": service_name,
                 "domains": set(values["Aliases"] + [container_name, container_hostname])
             })
 
     if container_ip:
-        result.append({"ip": container_ip, "name": container_name, "domains": [container_name, container_hostname ]})
+        result.append({"ip": container_ip, "name": service_name, "domains": [container_name, container_hostname ]})
 
     return result
 
@@ -100,7 +101,7 @@ def update_hosts_file():
 
     for id,addresses in hosts.items():
         for addr in addresses:
-            print("ip: %s domains: %s" % (addr["ip"], addr["domains"]))
+            print("ip: %s name: %s domains: %s" % (addr["ip"], addr["name"], addr["domains"]))
 
     #read all the lines of thge original file
     lines = []
@@ -123,7 +124,7 @@ def update_hosts_file():
         
         for id, addresses in hosts.items():
             for addr in addresses:
-                lines.append("%s    %s\n"%(addr["ip"],"   ".join(addr["domains"])))
+                lines.append("%s    %s    %s\n" % (addr["ip"], addr["name"], "   ".join(addr["domains"])))
         
         lines.append("#-----Do-not-add-hosts-after-this-line-----\n\n")
 
