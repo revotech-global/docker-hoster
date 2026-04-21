@@ -62,7 +62,7 @@ def get_container_data(dockerClient, container_id):
     container_hostname = info["Config"]["Hostname"]
     container_name = info["Name"].strip("/")
     service_name = info["Config"]["Labels"]["com.docker.compose.service"]
-    container_ip = info["NetworkSettings"]["IPAddress"]
+    container_ip = info["NetworkSettings"].get("IPAddress", "")
     if not container_ip:
         if info["HostConfig"] and info["HostConfig"]["NetworkMode"] and info["HostConfig"]["NetworkMode"].startswith("container:"):
             pid = info["HostConfig"]["NetworkMode"][10:]
